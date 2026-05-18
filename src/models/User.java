@@ -41,6 +41,7 @@ public class User implements java.io.Serializable {
     public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
     public void setFailedAttempts(int failedAttempts) { this.failedAttempts = failedAttempts; }
     public void setLocked(boolean locked) { isLocked = locked; }
+    public void setRole(Role role) { this.role = role; }
     
     public void incrementFailedAttempts() {
         this.failedAttempts++;

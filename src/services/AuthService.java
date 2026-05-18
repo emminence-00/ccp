@@ -14,11 +14,46 @@ public class AuthService {
     private User currentUser;
 
     public void register(String fullName, String email, String phone, LocalDate dob, String nationalId, String password, Role role) throws AuthenticationException {
-        if (users.containsKey(email)) {
-            throw new AuthenticationException("Email already registered.");
+        if (fullName == null || fullName.trim().isEmpty()) {
+            throw new AuthenticationException("Registration failed: Full Name cannot be empty.");
         }
-        if (!SecurityUtils.validateEmail(email)) throw new AuthenticationException("Invalid email format.");
-        
+        if (email == null || email.trim().isEmpty()) {
+            throw new AuthenticationException("Registration failed: Email cannot be empty.");
+        }
+        if (!SecurityUtils.validateEmail(email)) {
+            throw new AuthenticationException("Registration failed: Invalid email format.");
+        }
+        if (users.containsKey(email)) {
+            throw new AuthenticationException("Registration failed: Email already registered.");
+        }
+        if (phone == null || phone.trim().isEmpty()) {
+            throw new AuthenticationException("Registration failed: Phone number cannot be empty.");
+        }
+        if (!SecurityUtils.validatePhone(phone)) {
+            throw new AuthenticationException("Registration failed: Invalid phone number. Must be between 10 to 15 digits.");
+        }
+        if (nationalId == null || nationalId.trim().isEmpty()) {
+            throw new AuthenticationException("Registration failed: National ID cannot be empty.");
+        }
+        if (!SecurityUtils.validateNationalId(nationalId)) {
+            throw new AuthenticationException("Registration failed: Invalid National ID. Must be at least 5 characters.");
+        }
+        if (dob == null) {
+            throw new AuthenticationException("Registration failed: Date of Birth cannot be empty.");
+        }
+        if (dob.isAfter(LocalDate.now())) {
+            throw new AuthenticationException("Registration failed: Date of Birth cannot be in the future.");
+        }
+        if (dob.isAfter(LocalDate.now().minusYears(18))) {
+            throw new AuthenticationException("Registration failed: You must be at least 18 years old to register.");
+        }
+        if (password == null || password.isEmpty()) {
+            throw new AuthenticationException("Registration failed: Password cannot be empty.");
+        }
+        if (password.length() < 6) {
+            throw new AuthenticationException("Registration failed: Password must be at least 6 characters long.");
+        }
+
         String passwordHash = SecurityUtils.hashPassword(password);
         User user = new User(fullName, email, phone, dob, nationalId, passwordHash, role);
         users.put(email, user);
@@ -26,6 +61,16 @@ public class AuthService {
     }
 
     public User login(String email, String password) throws AuthenticationException {
+        if (email == null || email.trim().isEmpty()) {
+            throw new AuthenticationException("Login failed: Email cannot be empty.");
+        }
+        if (!SecurityUtils.validateEmail(email)) {
+            throw new AuthenticationException("Login failed: Invalid email format.");
+        }
+        if (password == null || password.isEmpty()) {
+            throw new AuthenticationException("Login failed: Password cannot be empty.");
+        }
+
         // Find user by email
         User user = users.get(email);
         

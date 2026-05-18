@@ -67,12 +67,9 @@ public class Main {
         LocalDate dob = LocalDate.parse(scanner.next());
         System.out.print("Password: ");
         String pw = scanner.next();
-        System.out.println("Role (1. CUSTOMER, 2. TELLER, 3. ADMIN): ");
-        int r = getIntInput();
-        Role role = (r == 3) ? Role.ADMIN : (r == 2) ? Role.TELLER : Role.CUSTOMER;
 
         try {
-            authService.register(name, email, phone, dob, nid, pw, role);
+            authService.register(name, email, phone, dob, nid, pw, Role.CUSTOMER);
             System.out.println("Registration successful.");
         } catch (AuthenticationException e) {
             System.err.println(e.getMessage());
@@ -114,14 +111,15 @@ public class Main {
     }
 
     private static void showAdminMenu() {
-        System.out.println("1. Admin Dashboard\n2. Apply Monthly Interest\n3. Check Overdue Loans\n4. Search Transactions\n5. Logout");
+        System.out.println("1. Admin Dashboard\n2. Apply Monthly Interest\n3. Check Overdue Loans\n4. Search Transactions\n5. Manage User Roles\n6. Logout");
         int choice = getIntInput();
         switch (choice) {
             case 1: reportingService.printAdminDashboard(); break;
             case 2: accountService.applyMonthlyInterest(); break;
             case 3: loanService.checkOverdueLoans(); break;
             case 4: handleSearchTransactions(); break;
-            case 5: 
+            case 5: handleManageUserRoles(); break;
+            case 6: 
                 authService.logout(); 
                 saveData();
                 break;
@@ -230,6 +228,27 @@ public class Main {
         res.forEach(System.out::println);
     }
 
+    private static void handleManageUserRoles() {
+        System.out.print("Enter User Email: ");
+        String email = scanner.next();
+        User targetUser = authService.getAllUsers().get(email);
+        if (targetUser == null) {
+            System.out.println("Error: User not found!");
+            return;
+        }
+        System.out.println("Current role for " + targetUser.getFullName() + " is " + targetUser.getRole());
+        System.out.println("Select New Role (1. CUSTOMER, 2. TELLER, 3. ADMIN): ");
+        int r = getIntInput();
+        if (r < 1 || r > 3) {
+            System.out.println("Invalid role choice.");
+            return;
+        }
+        Role newRole = (r == 3) ? Role.ADMIN : (r == 2) ? Role.TELLER : Role.CUSTOMER;
+        targetUser.setRole(newRole);
+        System.out.println("Successfully updated role to " + newRole + " for " + targetUser.getEmail());
+        saveData();
+    }
+
     private static Account selectAccount() {
         List<Account> myAccs = accountService.getAccountsForUser(authService.getCurrentUser());
         if (myAccs.isEmpty()) {
@@ -244,6 +263,7 @@ public class Main {
         return (idx >= 0 && idx < myAccs.size()) ? myAccs.get(idx) : null;
     }
 
+    @SuppressWarnings("unchecked")
     private static void loadData() {
         Map<String, Object> data = StorageService.loadState();
         if (data != null) {
