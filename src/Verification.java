@@ -66,9 +66,10 @@ public class Verification {
 
         // 5. Loan & EMI Verification
         System.out.println("Testing Loan EMI...");
-        Loan loan = loanService.applyForLoan(user, new BigDecimal("10000.00"), 12);
+        loanService.setServices(accountService, txService);
+        Loan loan = loanService.applyForLoan(user, new BigDecimal("10000.00"), 12, savings.getAccountNumber());
         System.out.println("Loan Status: " + loan.getStatus());
-        if (loan.getStatus() == LoanStatus.APPROVED) {
+        if (loan.getStatus() == LoanStatus.APPROVED || loan.getStatus() == LoanStatus.ACTIVE) {
             System.out.println("EMI: " + loan.calculateEMI());
             assert loan.calculateEMI().compareTo(BigDecimal.ZERO) > 0 : "EMI calculation failed";
         }

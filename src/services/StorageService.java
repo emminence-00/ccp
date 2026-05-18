@@ -8,14 +8,15 @@ public class StorageService {
     private static final String DATA_FILE = "bank_data.dat";
 
     // This method saves the entire state of the bank to a file
-    public static void saveState(Map<String, User> users, Map<String, Account> accounts, List<Transaction> transactions, List<Loan> loans) {
+    public static void saveState(Map<String, User> users, Map<String, Account> accounts, List<Transaction> transactions,
+            List<Loan> loans) {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(DATA_FILE))) {
             Map<String, Object> data = new HashMap<>();
             data.put("users", users);
             data.put("accounts", accounts);
             data.put("transactions", transactions);
             data.put("loans", loans);
-            
+
             oos.writeObject(data);
             System.out.println("Data saved successfully to " + DATA_FILE);
         } catch (IOException e) {

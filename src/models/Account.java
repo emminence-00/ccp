@@ -26,6 +26,9 @@ public abstract class Account implements java.io.Serializable {
     public void setStatus(AccountStatus status) { this.status = status; }
 
     public void deposit(BigDecimal amount) {
+        if (status != AccountStatus.ACTIVE) {
+            throw new IllegalStateException("Error: Account is not active!");
+        }
         // Increase balance if amount is positive
         if (amount.compareTo(BigDecimal.ZERO) > 0) {
             balance = balance.add(amount).setScale(2, RoundingMode.HALF_UP);
@@ -33,6 +36,12 @@ public abstract class Account implements java.io.Serializable {
     }
 
     public void withdraw(BigDecimal amount) throws InsufficientFundsException {
+        if (status != AccountStatus.ACTIVE) {
+            throw new IllegalStateException("Error: Account is not active!");
+        }
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Error: Withdrawal amount must be positive!");
+        }
         // First check if user has enough money
         if (balance.compareTo(amount) < 0) {
             throw new InsufficientFundsException("Error: Not enough money in account! Current balance is: " + balance);

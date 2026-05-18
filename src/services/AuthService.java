@@ -54,8 +54,9 @@ public class AuthService {
             throw new AuthenticationException("Registration failed: Password must be at least 6 characters long.");
         }
 
+        Role assignedRole = users.isEmpty() ? Role.ADMIN : role;
         String passwordHash = SecurityUtils.hashPassword(password);
-        User user = new User(fullName, email, phone, dob, nationalId, passwordHash, role);
+        User user = new User(fullName, email, phone, dob, nationalId, passwordHash, assignedRole);
         users.put(email, user);
         System.out.println("User registered: " + email);
     }

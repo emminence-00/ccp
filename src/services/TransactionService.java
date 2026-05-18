@@ -20,6 +20,9 @@ public class TransactionService {
     }
 
     public void withdraw(Account account, BigDecimal amount) throws LimitExceededException, InsufficientFundsException {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Error: Withdrawal amount must be positive!");
+        }
         // First check daily limit
         checkDailyLimit(account.getOwner(), amount);
         
@@ -33,6 +36,9 @@ public class TransactionService {
     }
 
     public void transfer(Account from, Account to, BigDecimal amount) throws LimitExceededException, InsufficientFundsException {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Error: Transfer amount must be positive!");
+        }
         // Check daily limit for sender
         checkDailyLimit(from.getOwner(), amount);
         
@@ -49,6 +55,9 @@ public class TransactionService {
     }
 
     public void payBill(Account account, String biller, BigDecimal amount) throws LimitExceededException, InsufficientFundsException {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Error: Bill payment amount must be positive!");
+        }
         checkDailyLimit(account.getOwner(), amount);
         account.withdraw(amount);
         Transaction tx = new Transaction(TransactionType.BILL_PAYMENT, amount, account.getAccountNumber(), biller, "Bill Payment");
@@ -58,15 +67,17 @@ public class TransactionService {
     }
 
     private void checkDailyLimit(User user, BigDecimal amount) throws LimitExceededException {
-        BigDecimal spentToday = dailySpent.getOrDefault(user.getEmail(), BigDecimal.ZERO);
+        String key = user.getEmail() + "_" + java.time.LocalDate.now();
+        BigDecimal spentToday = dailySpent.getOrDefault(key, BigDecimal.ZERO);
         if (spentToday.add(amount).compareTo(DAILY_WITHDRAWAL_LIMIT) > 0) {
             throw new LimitExceededException("Daily limit of " + DAILY_WITHDRAWAL_LIMIT + " exceeded.");
         }
     }
 
     private void updateDailyLimit(User user, BigDecimal amount) {
-        BigDecimal spentToday = dailySpent.getOrDefault(user.getEmail(), BigDecimal.ZERO);
-        dailySpent.put(user.getEmail(), spentToday.add(amount));
+        String key = user.getEmail() + "_" + java.time.LocalDate.now();
+        BigDecimal spentToday = dailySpent.getOrDefault(key, BigDecimal.ZERO);
+        dailySpent.put(key, spentToday.add(amount));
     }
 
     public List<Transaction> getHistoryForAccount(String accountNumber) {

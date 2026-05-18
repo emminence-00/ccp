@@ -17,9 +17,10 @@ public class Loan implements java.io.Serializable {
     private int tenureMonths;
     private LoanStatus status;
     private LocalDate startDate;
+    private String destinationAccountNumber;
     private List<Repayment> repaymentSchedule;
 
-    public Loan(User borrower, BigDecimal principal, double annualRate, int tenureMonths) {
+    public Loan(User borrower, BigDecimal principal, double annualRate, int tenureMonths, String destinationAccountNumber) {
         // Generate a simple 8-character ID manually
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         StringBuilder sb = new StringBuilder();
@@ -32,6 +33,7 @@ public class Loan implements java.io.Serializable {
         this.principal = principal;
         this.annualRate = annualRate;
         this.tenureMonths = tenureMonths;
+        this.destinationAccountNumber = destinationAccountNumber;
         this.status = LoanStatus.PENDING;
         this.repaymentSchedule = new ArrayList<>();
     }
@@ -61,9 +63,13 @@ public class Loan implements java.io.Serializable {
     public int getTenureMonths() { return tenureMonths; }
     public LoanStatus getStatus() { return status; }
     public void setStatus(LoanStatus status) { this.status = status; }
+    public LocalDate getStartDate() { return startDate; }
+    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+    public String getDestinationAccountNumber() { return destinationAccountNumber; }
+    public void setDestinationAccountNumber(String destinationAccountNumber) { this.destinationAccountNumber = destinationAccountNumber; }
     public List<Repayment> getRepaymentSchedule() { return repaymentSchedule; }
 
-    public static class Repayment {
+    public static class Repayment implements java.io.Serializable {
         private LocalDate dueDate;
         private BigDecimal amount;
         private boolean isPaid;
